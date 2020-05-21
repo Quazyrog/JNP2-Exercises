@@ -9,8 +9,8 @@
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
-            <option value="/data/quazyrog/Documents/MIMUW/2020L/JNP2/repo_/Task-01" />
-            <option value="/data/quazyrog/Documents/MIMUW/2020L/JNP2/repo_/Task-01/app" />
+            <option value="/data/quazyrog/Documents/MIMUW/2020L/JNP2/repo_/NotesTask" />
+            <option value="/data/quazyrog/Documents/MIMUW/2020L/JNP2/repo_/NotesTask/app" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

@@ -18,3 +18,11 @@ Rozwiązanie jest w katalogu `Task-03` w wersji otagowanej `task03`.
 
 W rozwiązaniu nie użyłem `AsyncTask`, bo widziałem w dokumentacji, że w jakiejś (dość odległej) wersji API ma być deprecated. Zamiast tego użyłem wbudowanych w Kotlina coroutines. O ile zrozumiałem dokumentację to w tym momencie kod działa tak, że tworzę bardzo dużo zatrzymywanych funkcji (cały czas mowa o "coroutines", których nie umiem przetłumaczyć na polski). One są uruchamiane przed domyślny dispatcher, który uruchamia je na tylu wątkach, ile jest dostępnych rdzeni, ale nie mniej niż na dwóch (linijki 42 i 53 w `Simulation.kt`). Wątki przekazują informację o zmianach stanu symulacji, wysyłając wiadomości za do Handlerów. Czy to jest poprawne ich użycie?
 
+## Zadanie 4
+
+Już wersja pierwsza trzyma notatki w jednym pliku. Generowanie losowych identyfikatorów i otwieranie wielu plików chyba nie jest aż tak ciekawe ani pouczające, żeby było sens to modyfikować wersję z zadania pierwszego.
+
+## Zadanie 5
+
+
+
