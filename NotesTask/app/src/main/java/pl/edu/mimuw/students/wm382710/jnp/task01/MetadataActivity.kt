@@ -1,6 +1,7 @@
 
 package pl.edu.mimuw.students.wm382710.jnp.task01
 
+import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -52,10 +53,6 @@ class MyAdapter: RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
 
 class MetadataActivity: AppCompatActivity() {
 
-    companion object {
-        var database: NoteDatabase? = null
-    }
-
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: MyAdapter
 
@@ -71,29 +68,22 @@ class MetadataActivity: AppCompatActivity() {
             adapter = viewAdapter
         }
         refreshNotes()
+    }
 
-        findViewById<View>(R.id.addNote).setOnClickListener {
-            GlobalScope.launch {
-                val dao = getDatabase().noteDao()
-                dao.saveNote(Note(null, "Test note", "Something i need to test", Date(), ""))
-            }
-            refreshNotes()
-        }
+    fun addNote(view: View) {
+        val newNote = Note.empty()
+        val intent = Intent(this, EditActivity::class.java)
+        intent.putExtra(EXTRA_NOTE, newNote)
+        startActivity(intent)
     }
 
     private fun refreshNotes() {
         GlobalScope.launch {
-            val dao = getDatabase().noteDao()
+            val dao = NoteDatabase.getDatabase(applicationContext).noteDao()
             MainScope().launch {
                 viewAdapter.setData(dao.loadAllMetadata())
             }
         }
-    }
-
-    private fun getDatabase(): NoteDatabase {
-        if (database === null)
-            database = Room.databaseBuilder(applicationContext, NoteDatabase::class.java, "notes.db").build()
-        return database!!
     }
 
 }

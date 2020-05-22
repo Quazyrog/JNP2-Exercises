@@ -21,7 +21,8 @@
         android:src="@android:drawable/ic_input_add"
         app:backgroundTint="@color/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:onClick="addNote"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,11 +1,14 @@
 package pl.edu.mimuw.students.wm382710.jnp.task01
 
+import android.content.Context
+import android.os.Parcelable
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.util.*
 import androidx.room.*
+import kotlinx.android.parcel.Parcelize
 
 @Entity(indices = [Index(value = ["modificationDate"])])
 data class NoteMetadata(
@@ -22,15 +25,23 @@ data class NoteContents(
 )
 
 
+@Parcelize
 data class Note(
     val id: Int?,
     var title: String,
     var summary: String,
     var modificationDate: Date,
     var content: String
-) {
+): Parcelable {
+    companion object {
+        fun empty() = Note(null, "", "", Date(), "")
+    }
+
     val isNotEmpty: Boolean
         get() = title.isNotEmpty() || summary.isNotEmpty() || content.isNotEmpty()
+
+    val hasId: Boolean
+        get() = id !== null && id != 0
 }
 
 @Dao
@@ -38,7 +49,7 @@ abstract class NoteDao {
     @Query("SELECT * FROM notemetadata WHERE id = :id")
     abstract fun loadMetadata(id: Int): NoteMetadata
 
-    @Query("SELECT * FROM notemetadata")
+    @Query("SELECT * FROM notemetadata ORDER BY modificationDate DESC")
     abstract suspend fun loadAllMetadata(): List<NoteMetadata>
 
     @Transaction
@@ -77,5 +88,15 @@ abstract class NoteDao {
 
 @Database(entities = [NoteMetadata::class, NoteContents::class], version = 1)
 abstract class NoteDatabase: RoomDatabase() {
+    companion object {
+        private var database: NoteDatabase? = null
+
+        fun getDatabase(context: Context): NoteDatabase {
+            if (database === null)
+                database = Room.databaseBuilder(context, NoteDatabase::class.java, "notes.db").build()
+            return database!!
+        }
+    }
+
     abstract fun noteDao(): NoteDao
 }
