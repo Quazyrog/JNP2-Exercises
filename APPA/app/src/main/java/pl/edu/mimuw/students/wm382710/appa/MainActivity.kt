@@ -1,5 +1,6 @@
 package pl.edu.mimuw.students.wm382710.appa
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
@@ -37,11 +38,14 @@ class MainActivity : AppCompatActivity() {
         outStream.close()
         inStream.close()
 
-        startAdventure(ZipFile(zipFile))
+        startAdventure(zipFile.path)
     }
 
-    fun startAdventure(zip: ZipFile) {
-
+    fun startAdventure(zipFileName: String) {
+        val intent = Intent(this, AdventureActivity::class.java)
+        intent.putExtra("zipFileName", zipFileName)
+        startActivity(intent)
+        finish()
     }
 
 }
