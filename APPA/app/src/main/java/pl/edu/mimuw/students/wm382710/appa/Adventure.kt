@@ -6,6 +6,8 @@ import android.util.Xml
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParser.*
 import org.xmlpull.v1.XmlPullParserException
+import pl.edu.mimuw.students.wm382710.appa.maps.KmlReader
+import pl.edu.mimuw.students.wm382710.appa.maps.TargetLocation
 import java.io.IOException
 import java.lang.Exception
 import java.util.zip.ZipFile
@@ -17,6 +19,7 @@ data class VignetteChoice(
 
 data class Vignette(
     var title: String,
+    var targetLocation: TargetLocation?,
     var image: Bitmap?,
     var description: String,
     var choices: ArrayList<VignetteChoice>
@@ -40,15 +43,23 @@ class AdventureReader {
     val definedLocations = HashMap<String, Vignette>()
 
     var result: Vignette? = null
+    var mapLocations: Map<String, TargetLocation> = HashMap()
 
     constructor(input: ZipFile) {
         zip = input
-
     }
 
     fun adventure(): Vignette {
         if (result !== null)
             return result as Vignette
+
+        val mapEntry = zip.getEntry("Map.kml")
+        if (mapEntry !== null) {
+            val p = KmlReader(zip.getInputStream(mapEntry))
+            p.read()
+            mapLocations = p.locations
+        }
+
         val entry = zip.getEntry("Main.xml")
         if (entry === null)
             throw InvalidAdventureFileException("No file Main.xml in zip")
@@ -91,7 +102,7 @@ class AdventureReader {
         // Create or find location object
         if (definedLocations.containsKey(id))
             throw InvalidAdventureFileException(parser.lineNumber, "location '$id' redefined")
-        val loc = undefinedLocations.getOrDefault(id, Vignette("", null, "", ArrayList()))
+        val loc = undefinedLocations.getOrDefault(id, Vignette("", null, null, "", ArrayList()))
         loc.title = parser.getAttributeValue(namespace, "title") ?: ""
 
         // Load image
@@ -103,6 +114,14 @@ class AdventureReader {
             loc.image = BitmapFactory.decodeStream(zip.getInputStream(zipEntry))
         }
         parser.next()
+
+        // Set target map location
+        val mapLoc = parser.getAttributeValue(namespace, "mapLocation")
+        if (mapLoc !== null) {
+            if (!mapLocations.containsKey(mapLoc))
+                throw InvalidAdventureFileException(parser.lineNumber, "Undefined map location '$mapLoc'")
+            loc.targetLocation = mapLocations[mapLoc]
+        }
 
         loc.description = readText()
         while (parser.eventType != END_TAG) {
@@ -131,7 +150,7 @@ class AdventureReader {
             undefinedLocations.containsKey(outcome) ->
                 undefinedLocations.getValue(outcome)
             else -> {
-                val loc = Vignette("", null, "", ArrayList())
+                val loc = Vignette("", null, null, "", ArrayList())
                 undefinedLocations[outcome] = loc
                 loc
             }
