@@ -9,7 +9,7 @@ class TangentPlaneProjectionTest {
     @Test
     fun xzProjection() {
         val r = 100.0
-        val proj = TangentPlaneProjection(-90.0, 0.0, r)
+        val proj = TangentPlaneProjection(-90.0 * RAD, 0.0 * RAD, r)
         for (i in 1 .. 1000) {
             val x = nextDouble() * 2.0 * r - r
             val y = nextDouble() * 2.0 * r - r
@@ -25,14 +25,14 @@ class TangentPlaneProjectionTest {
         val maxRelativeError = 0.05
         val spanDegInit = 2.0
         val r = TangentPlaneProjection.EARTH_EQUATORIAL_RADIUS
-        val outerCases = 10
+        val outerCases = 100
         val innerCases = 1_000
 
         for (n in 1..outerCases) {
             val spanDeg = n * spanDegInit / outerCases
             val cLon = nextDouble() * 360.0 - 180.0
             val cLat = nextDouble() * 180.0 - 90.0
-            val proj = TangentPlaneProjection(cLon, cLat, r)
+            val proj = TangentPlaneProjection(cLon * RAD, cLat * RAD, r)
 
             var cumulError = 0.0
 
@@ -42,8 +42,8 @@ class TangentPlaneProjectionTest {
                 val p1Lon = cLon + spanDeg * nextDouble()
                 val p1Lat = cLat + spanDeg * nextDouble()
 
-                val p0proj = proj(p0Lon, p0Lat)
-                val p1proj = proj(p1Lon, p1Lat)
+                val p0proj = proj(p0Lon * RAD, p0Lat * RAD)
+                val p1proj = proj(p1Lon * RAD, p1Lat * RAD)
 
                 val approximatedDistance = (p0proj - p1proj).len
                 val realDistance =

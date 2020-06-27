@@ -78,7 +78,7 @@ class KmlReader(private val stream: InputStream) {
         parser.next()
     }
 
-    private fun readPoint(): Point2D {
+    private fun readPoint(): EarthPoint {
         skipSpace()
         parser.require(XmlPullParser.START_TAG, null, "Point")
         parser.next()
@@ -97,7 +97,7 @@ class KmlReader(private val stream: InputStream) {
         parser.require(XmlPullParser.END_TAG, null, "Point")
         parser.next()
 
-        return Point2D(coords[0], coords[1])
+        return EarthPoint(coords[0], coords[1])
     }
 
     private fun readName(): String {
