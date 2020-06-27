@@ -1,9 +1,10 @@
 package pl.edu.mimuw.students.wm382710.appa.maps
 
+import kotlin.math.abs
 import kotlin.math.asin
 import kotlin.math.sqrt
 
-data class Point2D(val x: Double, val y: Double): TargetLocation {
+data class Point2D(val x: Double, val y: Double) {
     operator fun unaryMinus() = Point2D(-x, -y)
 
     operator fun plus(b: Point2D) = Point2D(x + b.x, y + b.y)
@@ -16,7 +17,7 @@ data class Point2D(val x: Double, val y: Double): TargetLocation {
 
     infix fun dot(b: Point2D) = x * b.x + y * b.y
 
-    private val normalize: Point2D
+    val normalize: Point2D
         get() = this / len
 
     val norm: Double
@@ -25,10 +26,15 @@ data class Point2D(val x: Double, val y: Double): TargetLocation {
     val len: Double
         get() = sqrt(norm)
 
-    override fun navigate(from: Point2D): Instruction {
-        val n = Point2D(0.0, 1.0)
-        val d = (this - from).normalize
-        return Instruction (asin(n.x * d.y - n.y * d.x), (this - from).len)
+    fun distanceFromSegment(s1: Point2D, s2: Point2D) = when {
+        (this - s1) dot (s2 - s1) > 0 -> (this - s1).norm
+        (this - s2) dot (s1 - s2) > 0 -> (this - s2).norm
+        else -> {
+            val num = abs((s2.y - s1.y) * x - (s2.x - s1.x) * y
+                    + s2.x * s1.y - s2.y * s1.x)
+            val denom = (s2 - s1).len
+            num / denom
+        }
     }
 
     companion object {
