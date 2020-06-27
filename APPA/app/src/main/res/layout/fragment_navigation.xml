@@ -16,6 +16,23 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Target name:"
+                style="@style/AppTheme.Vignette.Action"/>
+
+            <TextView
+                android:id="@+id/targetNameText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/AppTheme.Vignette.Action"/>
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="Target coordinates:"
                 style="@style/AppTheme.Vignette.Action"/>
 

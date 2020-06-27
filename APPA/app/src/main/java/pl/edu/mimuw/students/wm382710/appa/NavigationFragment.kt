@@ -3,7 +3,6 @@ package pl.edu.mimuw.students.wm382710.appa
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
-import android.os.ProxyFileDescriptorCallback
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -13,11 +12,11 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import kotlinx.android.synthetic.main.fragment_navigation.*
 import pl.edu.mimuw.students.wm382710.appa.maps.*
-import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
-import java.util.jar.Manifest
 import kotlin.concurrent.withLock
 
 class NavigationFragment : Fragment() {
@@ -26,6 +25,7 @@ class NavigationFragment : Fragment() {
     private var position: EarthPoint = EarthPoint(18.5000, 50.2314)
     private var callback: (() -> Unit)? = null
     private var hasView: Boolean = false
+    private lateinit var locationClient: FusedLocationProviderClient
 
     var targetLocation: TargetLocation?
         get() = target
@@ -43,6 +43,7 @@ class NavigationFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        locationClient = LocationServices.getFusedLocationProviderClient(context!!)
     }
 
     override fun onCreateView(
@@ -86,7 +87,16 @@ class NavigationFragment : Fragment() {
     }
 
     private fun startUsingLocation() {
+        if (ContextCompat.checkSelfPermission(context!!, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED){
+            val msg = "Cannot retrieve current location."
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+        }
 
+        locationClient.lastLocation.addOnSuccessListener {
+            lock.withLock {
+                currentLocation = EarthPoint(it.longitude, it.latitude)
+            }
+        }
     }
 
     private fun updateScreen() {
@@ -96,6 +106,7 @@ class NavigationFragment : Fragment() {
         lock.withLock {
             if (target === null)
                 return
+            targetNameText.text = target!!.name
             targetCoordinatesText.text = target.toString()
             currentCoordinatesText.text = position.toString()
             val navi = target!!.navigate(position)

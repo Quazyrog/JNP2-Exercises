@@ -60,7 +60,7 @@ class KmlReader(private val stream: InputStream) {
         parser.next()
 
         var name: String? = null
-        var target: TargetLocation? = null
+        var target: Pair<Double, Double>? = null
 
         skipSpace()
         while (parser.eventType != XmlPullParser.END_TAG) {
@@ -74,14 +74,14 @@ class KmlReader(private val stream: InputStream) {
         println("$name=$target")
 
         if (name !== null && name.length > 0 && target !== null)
-            locations[name] = target
+            locations[name] = PointLocation(name, target.first, target.second)
 
         skipSpace()
         parser.require(XmlPullParser.END_TAG, null, "Placemark")
         parser.next()
     }
 
-    private fun readPoint(): EarthPoint {
+    private fun readPoint(): Pair<Double, Double> {
         skipSpace()
         parser.require(XmlPullParser.START_TAG, null, "Point")
         parser.next()
@@ -100,7 +100,7 @@ class KmlReader(private val stream: InputStream) {
         parser.require(XmlPullParser.END_TAG, null, "Point")
         parser.next()
 
-        return EarthPoint(coords[0], coords[1])
+        return Pair(coords[0], coords[1])
     }
 
     private fun readName(): String {
