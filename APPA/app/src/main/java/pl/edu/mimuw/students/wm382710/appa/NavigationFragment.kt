@@ -3,6 +3,7 @@ package pl.edu.mimuw.students.wm382710.appa
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
+import android.os.Looper
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -12,8 +13,8 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.*
+import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
 import kotlinx.android.synthetic.main.fragment_navigation.*
 import pl.edu.mimuw.students.wm382710.appa.maps.*
 import java.util.concurrent.locks.ReentrantLock
@@ -80,6 +81,7 @@ class NavigationFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         updateScreen()
+        startUsingLocation()
     }
 
     fun onArrive(callback: () -> Unit) {
@@ -97,6 +99,17 @@ class NavigationFragment : Fragment() {
                 currentLocation = EarthPoint(it.longitude, it.latitude)
             }
         }
+
+        val request = LocationRequest.create()
+        request.interval = 2000
+        request.priority = PRIORITY_HIGH_ACCURACY
+        locationClient.requestLocationUpdates(request, object: LocationCallback() {
+            override fun onLocationResult(loc: LocationResult?) {
+                loc ?: return
+                currentLocation = averagePosition(loc)
+                updateScreen()
+            }
+        }, Looper.getMainLooper())
     }
 
     private fun updateScreen() {
@@ -116,5 +129,21 @@ class NavigationFragment : Fragment() {
             if (navi.distance < 5)
                 callback?.invoke()
         }
+    }
+
+    private fun averagePosition(r: LocationResult): EarthPoint {
+        var lon = 0.0
+        var lat = 0.0
+        var cnt = 0
+
+        for (location in r.locations){
+            val a = cnt / (cnt + 1.0)
+            val b = 1.0 / (cnt + 1.0)
+            lon = a * lon  + b * location.longitude
+            lat = a * lat + b * location.latitude
+            ++cnt
+        }
+
+        return EarthPoint(lon, lat)
     }
 }
