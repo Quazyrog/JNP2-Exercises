@@ -2,13 +2,16 @@ package pl.edu.mimuw.students.wm382710.appa.maps
 
 import pl.edu.mimuw.students.wm382710.appa.maps.TangentPlaneProjection.Companion.EARTH_EQUATORIAL_RADIUS
 import pl.edu.mimuw.students.wm382710.appa.maps.TangentPlaneProjection.Companion.EARTH_POLAR_RADIUS
+import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.acos
 import kotlin.math.asin
 
 data class Navigation(val azimuth: Double, val distance: Double)
 
 interface TargetLocation {
-    fun navigate(longitude: Double, latitude: Double): Navigation
+    fun navigate(longitude: Double, latitude: Double) = navigate(EarthPoint(longitude, latitude))
+    fun navigate(point: EarthPoint): Navigation
 }
 
 class EarthPoint(longitudeDeg: Double, latitudeDeg: Double): TargetLocation {
@@ -20,14 +23,14 @@ class EarthPoint(longitudeDeg: Double, latitudeDeg: Double): TargetLocation {
         require(-90 < latitudeDeg && latitudeDeg <= 90)
     }
 
-    override fun navigate(longitudeDeg: Double, latitudeDeg: Double): Navigation {
-        val redius = if (abs(latitudeDeg) > 45.0) EARTH_POLAR_RADIUS else EARTH_EQUATORIAL_RADIUS
-        val proj = TangentPlaneProjection(longitudeDeg * RAD, latitudeDeg * RAD)
+    override fun navigate(p: EarthPoint): Navigation {
+        val redius = if (p.lat > PI / 4) EARTH_POLAR_RADIUS else EARTH_EQUATORIAL_RADIUS
+        val proj = TangentPlaneProjection(p.lon, p.lat)
 
         val here = proj(lon, lat)
-        val there = proj(longitudeDeg * RAD, latitudeDeg * RAD)
+        val there = proj(p.lon, p.lat)
         val dir = (here - there).normalize
-        return Navigation (asin(proj.north.x * dir.y - proj.north.y * dir.x), (here - there).len)
+        return Navigation (-acos(dir.y), (here - there).len)
     }
 
     override fun toString(): String {

@@ -73,6 +73,9 @@ class KmlReader(private val stream: InputStream) {
         }
         println("$name=$target")
 
+        if (name !== null && name.length > 0 && target !== null)
+            locations[name] = target
+
         skipSpace()
         parser.require(XmlPullParser.END_TAG, null, "Placemark")
         parser.next()

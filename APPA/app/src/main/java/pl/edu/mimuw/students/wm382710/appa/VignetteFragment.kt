@@ -10,7 +10,16 @@ import android.widget.TextView
 import kotlinx.android.synthetic.main.fragment_vignette.*
 
 class VignetteFragment : Fragment() {
-    var onSelect: ((Int) -> Unit)? = null
+    private var onSelect: ((Int) -> Unit)? = null
+    private var vig: Vignette? = null
+    private var hasView: Boolean = false
+
+    var vignette: Vignette?
+        get() = vig
+        set(v: Vignette?) {
+            vig = v
+            showVignette()
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,19 +30,28 @@ class VignetteFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_vignette, container, false)
+        return inflater.inflate(R.layout.fragment_vignette, container, false).also { hasView = true }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        showVignette()
     }
 
     fun onSelect(callback: (Int) -> Unit) {
         onSelect = callback
     }
 
-    fun showVignette(vignette: Vignette) {
-        vignetteImageView.setImageBitmap(vignette.image)
-        vignetteDescription.text = vignette.description
+    private fun showVignette() {
+        if (!hasView || vig === null)
+            return
+
+        if (vig!!.image !== null)
+            vignetteImageView.setImageBitmap(vig!!.image)
+        vignetteDescription.text = vig!!.description
 
         vignetteChoices.removeAllViews()
-        vignette.choices.forEachIndexed() { index, choice ->
+        vig!!.choices.forEachIndexed() { index, choice ->
             val radio = RadioButton(context)
             radio.text = choice.text
             radio.setOnClickListener { onSelect?.let { it1 -> it1(index) } }

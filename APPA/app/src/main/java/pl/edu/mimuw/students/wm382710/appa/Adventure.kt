@@ -113,7 +113,6 @@ class AdventureReader {
                 throw InvalidAdventureFileException(parser.lineNumber, "missing zip entry '$imagePath'")
             loc.image = BitmapFactory.decodeStream(zip.getInputStream(zipEntry))
         }
-        parser.next()
 
         // Set target map location
         val mapLoc = parser.getAttributeValue(namespace, "mapLocation")
@@ -122,6 +121,7 @@ class AdventureReader {
                 throw InvalidAdventureFileException(parser.lineNumber, "Undefined map location '$mapLoc'")
             loc.targetLocation = mapLocations[mapLoc]
         }
+        parser.next()
 
         loc.description = readText()
         while (parser.eventType != END_TAG) {
