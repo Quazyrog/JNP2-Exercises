@@ -23,6 +23,7 @@ import pl.edu.mimuw.students.wm382710.appa.maps.TargetLocation
 import pl.edu.mimuw.students.wm382710.appa.maps.times
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+import kotlin.math.abs
 
 class NavigationFragment : Fragment() {
     private val lock = ReentrantLock()
@@ -30,7 +31,6 @@ class NavigationFragment : Fragment() {
     private var position: EarthPoint = EarthPoint(18.5000, 50.2314)
     private var callback: (() -> Unit)? = null
     private lateinit var locationClient: FusedLocationProviderClient
-    var a = -90F
 
     private var hasView: Boolean = false
     private var targetNameText: TextView? = null
@@ -107,8 +107,6 @@ class NavigationFragment : Fragment() {
         } else {
             startUsingLocation()
         }
-
-        compassView?.playStupidAnimation()
     }
 
     override fun onResume() {
@@ -156,8 +154,11 @@ class NavigationFragment : Fragment() {
             targetCoordinatesText!!.text = target.toString()
             currentCoordinatesText!!.text = position.toString()
             val navi = target!!.navigate(position)
-            azimuthText!!.text = "%.2f°".format(navi.azimuth * DEG)
+            azimuthText!!.text = "%.2f°".format(navi.azimuth)
             distanceText!!.text = "%.2fm".format(navi.distance)
+
+            compassView?.accuracy = 4F
+            compassView?.azimuth = navi.azimuth.toFloat()
 
             if (navi.distance < 15)
                 callback?.invoke()

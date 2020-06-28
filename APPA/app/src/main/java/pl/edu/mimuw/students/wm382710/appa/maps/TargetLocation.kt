@@ -29,6 +29,7 @@ class PointLocation(private val locationName: String, longitudeDeg: Double, lati
         val here = proj(lon, lat)
         val there = proj(p.lon, p.lat)
         val dir = (here - there).normalize
-        return Navigation (asin(dir.x), (here - there).len)
+
+        return Navigation (asin(dir.x) * DEG, (here - there).len)
     }
 }

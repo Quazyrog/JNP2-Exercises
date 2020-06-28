@@ -17,12 +17,12 @@ class CompassView(context: Context, attrs: AttributeSet) : View(context, attrs)
     private lateinit var innerRect: RectF
     private lateinit var clipPath: Path
 
-    private var facingCcw = 4.0F
+    private var facingCcw = 0.0F
     private var naviCcw = 0.0F
-    private var highlightThickness = 4F
+    private var highlightThickness = 0F
 
     private var onRangeStart = 0F
-    private var onRangeEnd = 8.0F
+    private var onRangeEnd = 0.0F
 
     private val stupidAnimationHandler = Handler()
 
@@ -86,7 +86,7 @@ class CompassView(context: Context, attrs: AttributeSet) : View(context, attrs)
             onRangeStart += 360
             onRangeEnd += 360
         }
-        println("Highlighted range: [$onRangeStart, $onRangeEnd]")
+//        println("Highlighted range: [$onRangeStart, $onRangeEnd]")
 
         invalidate()
     }
@@ -117,7 +117,7 @@ class CompassView(context: Context, attrs: AttributeSet) : View(context, attrs)
         }
 
         private fun angleInternalToExternal(angle: Float): Float {
-            val a = -(angle + 90.0F) % 360.0F
+            val a = (angle + 90.0F) % 360.0F
             return when {
                 a <= 180 -> a
                 else -> a - 360
@@ -126,10 +126,10 @@ class CompassView(context: Context, attrs: AttributeSet) : View(context, attrs)
 
         private fun angleExternalToInternal(angle: Float): Float {
             val a = when {
-                angle <= 180 -> angle
-                else -> angle + 360
+                angle < 0 -> angle + 360
+                else -> angle
             }
-            return -(a + 270.0F) % 360.0F
+            return (a + 270.0F) % 360.0F
         }
     }
 }
