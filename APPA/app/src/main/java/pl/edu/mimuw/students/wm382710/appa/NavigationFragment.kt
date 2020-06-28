@@ -8,6 +8,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RadioGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,18 +17,25 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
 import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
-import kotlinx.android.synthetic.main.fragment_navigation.*
 import pl.edu.mimuw.students.wm382710.appa.maps.*
+import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+import kotlin.random.Random.Default.nextDouble
 
 class NavigationFragment : Fragment() {
     private val lock = ReentrantLock()
     private var target: TargetLocation? = null
     private var position: EarthPoint = EarthPoint(18.5000, 50.2314)
     private var callback: (() -> Unit)? = null
-    private var hasView: Boolean = false
     private lateinit var locationClient: FusedLocationProviderClient
+
+    private var hasView: Boolean = false
+    private var targetNameText: TextView? = null
+    private var targetCoordinatesText: TextView? = null
+    private var currentCoordinatesText: TextView? = null
+    private var azimuthText: TextView? = null
+    private var distanceText: TextView? = null
 
     var targetLocation: TargetLocation?
         get() = target
@@ -52,7 +61,24 @@ class NavigationFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_navigation, container, false).also { hasView = true }
+        val ui = inflater.inflate(R.layout.fragment_navigation, container, false)
+        targetNameText = ui.findViewById(R.id.targetNameText)
+        targetCoordinatesText = ui.findViewById(R.id.targetCoordinatesText)
+        currentCoordinatesText = ui.findViewById(R.id.currentCoordinatesText)
+        azimuthText = ui.findViewById(R.id.azimuthText)
+        distanceText = ui.findViewById(R.id.distanceText)
+        hasView = true
+        return ui
+    }
+
+    override fun onDestroyView() {
+        hasView = false
+        targetNameText = null
+        targetCoordinatesText = null
+        currentCoordinatesText = null
+        azimuthText = null
+        distanceText = null
+        super.onDestroyView()
     }
 
     override fun onStart() {
@@ -80,8 +106,8 @@ class NavigationFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        updateScreen()
         startUsingLocation()
+        updateScreen()
     }
 
     fun onArrive(callback: () -> Unit) {
@@ -119,14 +145,14 @@ class NavigationFragment : Fragment() {
         lock.withLock {
             if (target === null)
                 return
-            targetNameText.text = target!!.name
-            targetCoordinatesText.text = target.toString()
-            currentCoordinatesText.text = position.toString()
+            targetNameText!!.text = target!!.name
+            targetCoordinatesText!!.text = target.toString()
+            currentCoordinatesText!!.text = position.toString()
             val navi = target!!.navigate(position)
-            azimuthText.text = "%.2f°".format(navi.azimuth * DEG)
-            distanceText.text = "%.2fm".format(navi.distance)
+            azimuthText!!.text = "%.2f°".format(navi.azimuth * DEG)
+            distanceText!!.text = "%.2fm".format(navi.distance)
 
-            if (navi.distance < 5)
+            if (navi.distance < 5 || nextDouble() < 0.1)
                 callback?.invoke()
         }
     }

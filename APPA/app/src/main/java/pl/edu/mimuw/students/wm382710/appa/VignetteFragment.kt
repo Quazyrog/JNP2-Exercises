@@ -5,14 +5,19 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.RadioButton
+import android.widget.RadioGroup
 import android.widget.TextView
-import kotlinx.android.synthetic.main.fragment_vignette.*
 
 class VignetteFragment : Fragment() {
     private var onSelect: ((Int) -> Unit)? = null
     private var vig: Vignette? = null
+
     private var hasView: Boolean = false
+    private var vignetteImageView: ImageView? = null
+    private var vignetteDescription: TextView? = null
+    private var vignetteChoices: RadioGroup? = null
 
     var vignette: Vignette?
         get() = vig
@@ -30,7 +35,20 @@ class VignetteFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_vignette, container, false).also { hasView = true }
+        val ui = inflater.inflate(R.layout.fragment_vignette, container, false)
+        vignetteImageView = ui.findViewById(R.id.vignetteImageView)
+        vignetteDescription = ui.findViewById(R.id.vignetteDescription)
+        vignetteChoices = ui.findViewById(R.id.vignetteChoices)
+        hasView = true
+        return ui
+    }
+
+    override fun onDestroyView() {
+        hasView = false
+        vignetteImageView = null
+        vignetteDescription = null
+        vignetteChoices = null
+        super.onDestroyView()
     }
 
     override fun onResume() {
@@ -43,19 +61,19 @@ class VignetteFragment : Fragment() {
     }
 
     private fun showVignette() {
-        if (!hasView || vig === null)
+        if (!hasView)
             return
 
         if (vig!!.image !== null)
-            vignetteImageView.setImageBitmap(vig!!.image)
-        vignetteDescription.text = vig!!.description
+            vignetteImageView!!.setImageBitmap(vig!!.image)
+        vignetteDescription!!.text = vig!!.description
 
-        vignetteChoices.removeAllViews()
+        vignetteChoices!!.removeAllViews()
         vig!!.choices.forEachIndexed() { index, choice ->
             val radio = RadioButton(context)
             radio.text = choice.text
             radio.setOnClickListener { onSelect?.let { it1 -> it1(index) } }
-            vignetteChoices.addView(radio)
+            vignetteChoices!!.addView(radio)
         }
     }
 }
