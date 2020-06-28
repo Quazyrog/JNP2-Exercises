@@ -3,25 +3,26 @@ package pl.edu.mimuw.students.wm382710.appa
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
+import android.os.Handler
 import android.os.Looper
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import com.google.android.gms.location.*
 import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
-import pl.edu.mimuw.students.wm382710.appa.maps.*
-import java.util.*
+import pl.edu.mimuw.students.wm382710.appa.maps.DEG
+import pl.edu.mimuw.students.wm382710.appa.maps.EarthPoint
+import pl.edu.mimuw.students.wm382710.appa.maps.TargetLocation
+import pl.edu.mimuw.students.wm382710.appa.maps.times
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
-import kotlin.random.Random.Default.nextDouble
 
 class NavigationFragment : Fragment() {
     private val lock = ReentrantLock()
@@ -29,6 +30,7 @@ class NavigationFragment : Fragment() {
     private var position: EarthPoint = EarthPoint(18.5000, 50.2314)
     private var callback: (() -> Unit)? = null
     private lateinit var locationClient: FusedLocationProviderClient
+    var a = -90F
 
     private var hasView: Boolean = false
     private var targetNameText: TextView? = null
@@ -36,6 +38,7 @@ class NavigationFragment : Fragment() {
     private var currentCoordinatesText: TextView? = null
     private var azimuthText: TextView? = null
     private var distanceText: TextView? = null
+    private var compassView: CompassView? = null
 
     var targetLocation: TargetLocation?
         get() = target
@@ -67,6 +70,7 @@ class NavigationFragment : Fragment() {
         currentCoordinatesText = ui.findViewById(R.id.currentCoordinatesText)
         azimuthText = ui.findViewById(R.id.azimuthText)
         distanceText = ui.findViewById(R.id.distanceText)
+        compassView = ui.findViewById(R.id.compassView)
         hasView = true
         return ui
     }
@@ -78,6 +82,7 @@ class NavigationFragment : Fragment() {
         currentCoordinatesText = null
         azimuthText = null
         distanceText = null
+        compassView = null
         super.onDestroyView()
     }
 
@@ -102,6 +107,8 @@ class NavigationFragment : Fragment() {
         } else {
             startUsingLocation()
         }
+
+        compassView?.playStupidAnimation()
     }
 
     override fun onResume() {
@@ -152,7 +159,7 @@ class NavigationFragment : Fragment() {
             azimuthText!!.text = "%.2f°".format(navi.azimuth * DEG)
             distanceText!!.text = "%.2fm".format(navi.distance)
 
-            if (navi.distance < 5 || nextDouble() < 0.1)
+            if (navi.distance < 15)
                 callback?.invoke()
         }
     }
