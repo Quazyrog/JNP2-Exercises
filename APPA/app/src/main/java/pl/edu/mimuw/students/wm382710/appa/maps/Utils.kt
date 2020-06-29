@@ -21,7 +21,7 @@ open class EarthPoint(longitudeDeg: Double, latitudeDeg: Double) {
 
     override fun toString(): String {
         val ns = if (lat > 0) "%.4fN".format(lat * DEG) else "%.4fS".format(-lat * DEG)
-        val ew = if (lon > 0) "%.4fW".format(lon * DEG) else "%.4fE".format(-lon * DEG)
+        val ew = if (lon > 0) "%.4fE".format(lon * DEG) else "%.4fW".format(-lon * DEG)
         return "($ns $ew)"
     }
 }
