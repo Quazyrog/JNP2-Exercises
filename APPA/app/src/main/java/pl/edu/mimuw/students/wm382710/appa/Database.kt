@@ -45,6 +45,9 @@ abstract class AdventureMetadataDao {
 
     @Query("SELECT * FROM adventuremetadata ORDER BY title")
     abstract suspend fun selectAllMetadata(): List<AdventureMetadata>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun saveMetadata(metadata: AdventureMetadata): Long
 }
 
 @Dao
