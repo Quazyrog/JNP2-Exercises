@@ -28,7 +28,7 @@ data class HeroWithInventory(
         parentColumn = "heroId",
         entityColumn = "itemId"
     )
-    val playlists: List<Item>
+    val items: List<Item>
 )
 
 @Entity
@@ -69,7 +69,7 @@ abstract class HeroDao {
     abstract fun deleteHero(hero: Hero);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insertItems(vararg items: Item)
+    abstract fun insertItems(items: List<Item>)
 }
 
 @Database(entities = [Hero::class, Item::class, AdventureMetadata::class], version = 1)

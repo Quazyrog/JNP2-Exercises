@@ -119,6 +119,7 @@ class AdventuresListAdapter(private val activity: MainActivity): RecyclerView.Ad
 class MainActivity : AppCompatActivity() {
     private val heroesAdapter = HeroesListAdapter(this)
     private val adventuresAdapter = AdventuresListAdapter(this)
+    private var selectedHero: Hero? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -148,7 +149,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onHeroSelected(hero: Hero) {
-        showAdventureSelection(hero)
+        selectedHero = hero
+        showAdventureSelection()
     }
 
     private fun showHeroSelection() {
@@ -166,7 +168,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showAdventureSelection(hero: Hero) {
+    private fun showAdventureSelection() {
         setContentView(R.layout.adventure_selection)
         findViewById<Button>(R.id.importButton).setOnClickListener {
             val req = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -231,6 +233,7 @@ class MainActivity : AppCompatActivity() {
         val copyName = "Adv_%02d.zip".format(adventure.adventureId)
         val zipFile = File(cacheDir.path, copyName)
         intent.putExtra("zipFileName", zipFile.toString())
+        intent.putExtra("heroId", selectedHero!!.heroId)
         startActivity(intent)
         finish()
     }
