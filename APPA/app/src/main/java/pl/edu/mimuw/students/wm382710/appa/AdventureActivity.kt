@@ -12,7 +12,6 @@ class AdventureActivity : AppCompatActivity() {
     private lateinit var loc: Vignette
     var heroId: Int = 0
     private var hero: HeroWithInventory? = null
-    private val addedItems: ArrayList<Item> = ArrayList()
     private var arrived = true
 
     var location: Vignette
@@ -53,9 +52,11 @@ class AdventureActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         GlobalScope.launch {
-            val db = AppaDatabase.getDatabase(applicationContext)
-            db.heroes().insertItems(addedItems)
-            addedItems.clear()
+            hero?.let {
+                val db = AppaDatabase.getDatabase(applicationContext)
+                db.heroes().insertItems(it.newItems)
+                it.newItems.clear()
+            }
         }
     }
 
@@ -85,7 +86,7 @@ class AdventureActivity : AppCompatActivity() {
     private fun showVignette() {
         val transition = supportFragmentManager.beginTransaction()
 
-        val fragment = VignetteFragment()
+        val fragment = VignetteFragment(hero!!)
         fragment.vignette = loc
 
         transition.replace(R.id.centralWidget, fragment)

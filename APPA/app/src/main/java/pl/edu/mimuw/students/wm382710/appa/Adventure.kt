@@ -12,9 +12,32 @@ import java.io.IOException
 import java.lang.Exception
 import java.util.zip.ZipFile
 
+data class Requirements(
+    val intelligence: Int = 0,
+    val strength: Int = 0,
+    val dexterity: Int = 0,
+    val constitution: Int = 0,
+    val item: String? = null
+) {
+    fun check(h: HeroWithInventory): Boolean {
+        if (h.hero.intelligence < intelligence)
+            return false
+        if (h.hero.strength < strength)
+            return false
+        if (h.hero.dexterity < dexterity)
+            return false
+        if (h.hero.constitution < constitution)
+            return false
+        if (item !== null && !h.hasItem(item))
+            return false
+        return true
+    }
+}
+
 data class VignetteChoice(
     val text: String,
-    val outcome: Vignette
+    val outcome: Vignette,
+    val requirements: Requirements = Requirements()
 )
 
 data class Vignette(
@@ -22,7 +45,8 @@ data class Vignette(
     var targetLocation: TargetLocation?,
     var image: Bitmap?,
     var description: String,
-    var choices: ArrayList<VignetteChoice>
+    var choices: ArrayList<VignetteChoice>,
+    var grantItem: String? = null
 )
 
 class InvalidAdventureFileException: IOException {
@@ -121,6 +145,9 @@ class AdventureReader {
                 throw InvalidAdventureFileException(parser.lineNumber, "Undefined map location '$mapLoc'")
             loc.targetLocation = mapLocations[mapLoc]
         }
+
+        // Item maybe?
+        parser.getAttributeValue(namespace, "item")?.let { loc.grantItem = it }
         parser.next()
 
         loc.description = readText()
@@ -155,13 +182,21 @@ class AdventureReader {
                 loc
             }
         }
-        parser.next()
 
+        // Requirements
+        var requirements = Requirements()
+        parser.getAttributeValue(namespace, "reqInt")?.let { requirements = requirements.copy(intelligence = it.toInt()) }
+        parser.getAttributeValue(namespace, "reqDex")?.let { requirements = requirements.copy(dexterity = it.toInt()) }
+        parser.getAttributeValue(namespace, "reqStr")?.let { requirements = requirements.copy(strength = it.toInt()) }
+        parser.getAttributeValue(namespace, "reqCon")?.let { requirements = requirements.copy(constitution = it.toInt()) }
+        parser.getAttributeValue(namespace, "reqItem")?.let { requirements = requirements.copy(item = it) }
+
+        parser.next()
         val text = readText()
 
         parser.require(END_TAG, namespace, "choice")
         parser.next()
-        return VignetteChoice(text, outcomeLoc)
+        return VignetteChoice(text, outcomeLoc, requirements)
     }
 
     private fun readText(): String {

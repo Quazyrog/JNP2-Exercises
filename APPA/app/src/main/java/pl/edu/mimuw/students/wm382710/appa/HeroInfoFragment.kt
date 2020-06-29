@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 
 class ItemsRecyclerAdapter(private val context: Context): RecyclerView.Adapter<ItemsRecyclerAdapter.ViewHolder>() {
 
-    var dataset: List<Item>? = null
+    var dataSource: HeroWithInventory? = null
 
     class ViewHolder(private val root: TextView): RecyclerView.ViewHolder(root) {
         private var myItem: Item? = null
@@ -33,15 +33,18 @@ class ItemsRecyclerAdapter(private val context: Context): RecyclerView.Adapter<I
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.item = dataset!![position]
+        if (position >= hero.newItems.size)
+            holder.item = hero.items[position - hero.newItems.size]
+        else
+            holder.item = hero.newItems[position]
     }
 
-    override fun getItemCount() = if (dataset !== null) dataset!!.size else 0
+    override fun getItemCount() = if (dataSource !== null) hero.items.size + hero.newItems.size else 0
 
-    var data: List<Item>
-        get() = dataset ?: ArrayList()
+    var hero: HeroWithInventory
+        get() = dataSource ?: throw IllegalStateException("No hero assigned")
         set(value) {
-            dataset = value
+            dataSource = value
             MainScope().launch { notifyDataSetChanged() }
         }
 }
@@ -79,6 +82,6 @@ class HeroInfoFragment : Fragment() {
         findViewById<TextView>(R.id.dexterityText).text = shownHero.hero.dexterity.toString()
         findViewById<TextView>(R.id.intelligenceText).text = shownHero.hero.intelligence.toString()
         findViewById<TextView>(R.id.constitutionText).text = shownHero.hero.constitution.toString()
-        itemsAdapter.data = shownHero.items
+        itemsAdapter.hero = shownHero
     }
 }

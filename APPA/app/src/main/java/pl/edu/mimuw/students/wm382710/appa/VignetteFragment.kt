@@ -10,7 +10,7 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
 
-class VignetteFragment : Fragment() {
+class VignetteFragment(private val hero: HeroWithInventory) : Fragment() {
     private var onSelect: ((Int) -> Unit)? = null
     private var vig: Vignette? = null
 
@@ -68,8 +68,15 @@ class VignetteFragment : Fragment() {
             vignetteImageView!!.setImageBitmap(vig!!.image)
         vignetteDescription!!.text = vig!!.description
 
+        vig!!.grantItem?.let {
+            if (!hero.hasItem(it))
+                hero.newItems.add(Item(0, hero.hero.heroId, it, ""))
+        }
+
         vignetteChoices!!.removeAllViews()
         vig!!.choices.forEachIndexed() { index, choice ->
+            if (!choice.requirements.check(hero))
+                return@forEachIndexed
             val radio = RadioButton(context)
             radio.text = choice.text
             radio.setOnClickListener { onSelect?.let { it1 -> it1(index) } }

@@ -29,7 +29,10 @@ data class HeroWithInventory(
         entityColumn = "itemId"
     )
     val items: List<Item>
-)
+) {
+    @Ignore val newItems: ArrayList<Item> = ArrayList()
+    fun hasItem(name: String) = items.find { it.name == name } !== null || newItems.find { it.name == name } !== null
+}
 
 @Entity
 data class AdventureMetadata(
