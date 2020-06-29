@@ -92,16 +92,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onHeroCreationRequested() {
+        val intent = Intent(this, CreateHeroActivity::class.java)
+        startActivityForResult(intent, 1)
+        println("Hero created or not, refreshing the list!")
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
         GlobalScope.launch {
-            val hero = Hero(0, "X the D")
             val db = AppaDatabase.getDatabase(applicationContext)
-            db.heroes().insertHero(hero)
             adapter.data = db.heroes().selectAllHeroes()
         }
     }
 
     fun onHeroDeleted(hero: Hero) {
-
+        GlobalScope.launch {
+            val db = AppaDatabase.getDatabase(applicationContext)
+            db.heroes().deleteHero(hero)
+            adapter.data = db.heroes().selectAllHeroes()
+        }
     }
 
     fun onHeroSelected(hero: Hero) {

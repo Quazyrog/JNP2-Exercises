@@ -62,6 +62,9 @@ abstract class HeroDao {
     @Insert
     abstract fun updateHero(hero: Hero)
 
+    @Delete
+    abstract fun deleteHero(hero: Hero);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertItems(vararg items: Item)
 }
